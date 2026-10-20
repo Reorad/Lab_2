@@ -1,0 +1,3 @@
+*.cpp filter=nocomments
+*.h filter=nocomments
+Profiler.h -filter
