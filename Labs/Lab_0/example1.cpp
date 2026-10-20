@@ -1,24 +1,26 @@
 #include "Profiler.h"
 #include <cmath>
+
 Profiler prf("Lab0");
 
 int array_numb[100]={0};
+
 
 void generate_array(int *array, int start , int finish, int step, int *indx){
     *indx = 0;
     while(start<=finish){
         array[*indx] = start;
         start += step;
-        (*indx)++;
+        (*indx)++; 
     }
 }
 
 void make_graphs(int *array, int indx){
     for(int i=0; i< indx; i++)
-    {
+    {   
         float Oy = array[i];
         float Ox = array[i];
-        prf.countOperation("O(n)", Ox, Oy);
+        prf.countOperation("O(n)", Ox, Oy); 
         prf.countOperation("O(log(n))", Ox , 100*log(Oy) );
         prf.countOperation("O(10 ori n)", Ox , 10*Oy);
         prf.countOperation("O(n ori log(n))", Ox, Oy * log(Oy) );
