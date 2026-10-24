@@ -45,7 +45,7 @@ const char *Quick_Sort_Best_Total = "QuickSort Best Total";
 
 // Running constants 
 
-const int T_running_tine = 500;
+const int T_running_tine = 1000;
 
 template <typename T>
 void swap_func(T& num1, T& num2) {

@@ -55,43 +55,19 @@ void QuickSort(int *arr, int l, int r){
 
 }
 
-int Partition_Best(int *arr, int l , int r ){
+
+void BisCase(int *arr, int l, int r){
+
+    if(l >= r)
+        return;
 
     int mid = (l+r)/2;
 
-    swap_func(arr[mid] ,arr[r]);
-    QS_Ass->count(3);
+    BisCase(arr, l, mid-1);
+    BisCase(arr, mid+1, r);
 
-    int i = l-1;
-    for(int j = l ; j<r ; j++){
-        QS_Comp -> count();
-        if(arr[j] < arr[r]){
-            i++;
-            QS_Ass -> count(3);
-            swap_func(arr[j], arr[i]);
-        }
-    }
-
-    QS_Ass->count(3);
-    swap_func(arr[i+1], arr[r]); 
-
-    return i+1;
-
+    swap_func(arr[mid], arr[r]);      
 }
-
-void QuickSort_Best(int *arr, int l, int r ){
-    
-    if(l>=r){
-        return;
-    }
-
-    int pos = Partition_Best(arr, l,r);
-    QuickSort_Best(arr,l,pos-1);
-    QuickSort_Best(arr,pos+1,r);
-
-}
-
-
 
 //HeapSorting
 
@@ -242,12 +218,14 @@ void QuickSort_Comparisons(){
 
             //Best 
         FillRandomArray(arr_initial+1, n, arr_min, arr_max, true, ASCENDING);
+        
         CopyArray(arr_copy+1, arr_initial + 1, n);
+        BisCase(arr_copy,1,n);
         Operation ass_BEST_QS = prf.createOperation(Quick_Sort_Best_Assign,n);
         Operation comp_BEST_QS = prf.createOperation(Quick_Sort_Best_Comp,n);
         QS_Ass = &ass_BEST_QS;
         QS_Comp = &comp_BEST_QS;
-        QuickSort_Best(arr_copy,1,n);
+        QuickSort(arr_copy,1,n);
 
         deinitialize_global_operations();
 
@@ -361,7 +339,6 @@ void Threshold_Average(){
             FillRandomArray(arr_init + 1, n, arr_min, arr_max, false, UNSORTED);
             
             for(int j = MIN_THRESHOLD ; j <= MAX_THRESHOLD ; j+= STEP_TH){
-                // please dont put some value over 2 digits ff i m not doing error handling like its PC exam again
                 CopyArray(arr_copy + 1, arr_init + 1, n);
                 
                 Operation ass = prf.createOperation("Assign Th",j);
@@ -401,77 +378,51 @@ void Threshold_Average_Runtime(){
         arr_init[0] = -1;
         arr_copy[0] = -1;
 
-        for(int i = Test_start; i<= 5; i+= Test_step){
+        for(int i = Test_start; i<= Test_attemtps; i+= Test_step){
             printf("Running Time Threhsold values rn %d \n", n);
             
             FillRandomArray(arr_init + 1, n, arr_min, arr_max, false, UNSORTED);
             
-            for(int j = MIN_THRESHOLD ; j <= MAX_THRESHOLD ; j+= STEP_TH){
-                // please dont put some value over 2 digits ff i m not doing error handling like its PC exam again
-                
-                Operation ass = prf.createOperation("dummy",j);
-                Operation cmp = prf.createOperation("dummy",j);
+            for(int j = MIN_THRESHOLD ; j <= MAX_THRESHOLD ; j+= STEP_TH){                
+                Operation ass = prf.createOperation("Assign Th",j);
+                Operation cmp = prf.createOperation("Comps Th",j);
 
-                QS_Th_Ass = &ass; 
+                QS_Th_Ass = &ass;
                 QS_Th_Comp = &cmp;
-                
-                int **t_copies = (int**)malloc(T_running_tine * sizeof(int*));
-                for(int z = 0; z<T_running_tine; z++){
-                    t_copies[z] = (int*)malloc((n+1) * sizeof(int));
-                    t_copies[z][0] = -1;
-                    CopyArray(t_copies[z]+ 1, arr_init + 1, n);
-                }
-                
+
                 prf.startTimer("Running time comp", j);
                 for(int z = 0; z<T_running_tine; z++){
-                    
-                    QuickSort_Hybrid_DIESEL_ELECTRIC(t_copies[z],1,n,j);
+                    CopyArray(arr_copy + 1, arr_init + 1, n);
+                    QuickSort_Hybrid_DIESEL_ELECTRIC(arr_copy,1,n,j);
                 }
                 prf.stopTimer("Running time comp",j);
-
-                for(int z = 0; z<T_running_tine; z++){
-                    free(t_copies[z]);
-                }
-                free(t_copies);
 
                 printf("Runn test %d at Threshold %d \n",i, j);
 
             }
 
         }   
-        // divide series now then add them up do a big cmp and see finally the threshold from comparisons 
-        // then runtime run both make graphs for each add them up
-        // prf.divideValues("Assign Th",5);
-        // prf.divideValues("Comps Th",5);
-        // prf.addSeries("Total runtime", "Assign Th", "Comps Th");
+
 
         free(arr_copy);
         free(arr_init);
 }
 
 void Create_Run_Grups(){
-    prf.createGroup("Assigns vs Comparisons", "Assign Th", "Comps Th", "dummy" );
+    prf.createGroup("Assigns vs Comparisons", "Assign Th", "Comps Th" );
     prf.createGroup("Total Operation Th", "Total QS operations" );
     prf.createGroup("Running time Th","Running time comp" );
    
 }
 
-const int Threshold_val = 10;
+const int Threshold_val_operations = 10;
+
 
 // Compare QuickSort and HibrdQuickSort
 
-// Operation *QS_Ass = nullptr; - for regular
-// Operation *QS_Comp = nullptr;
-// Operation *QS_Th_Ass; // 10 to 10 .... - for hybird
-// Operation *QS_Th_Comp;
-// Operation *HP_Ass = nullptr;
-// Operation *HP_Comp = nullptr;
-// Operation *QS_Th_Ass; // 10 to 10 ....
-// Operation *QS_Th_Comp;
-
 void Operation_comp_QS_vs_HQS(){
 
-    for(int n=Step_Initial; n<= 5000; n+= Step_Size){
+        for(int n=Step_Initial; n<= Step_Final; n+= Step_Size){
 
         int *arr_init =(int*)malloc((n+1) * sizeof(int));
         int *arr_coppy =(int*)malloc((n+1) * sizeof(int));
@@ -498,7 +449,7 @@ void Operation_comp_QS_vs_HQS(){
             Operation cmp_QS_hyb = prf.createOperation("Hybrid Comp QS", n);
             QS_Th_Ass = &ass_QS_hyb;
             QS_Th_Comp = &cmp_QS_hyb;
-            QuickSort_Hybrid_DIESEL_ELECTRIC(arr_coppy,1,n, Threshold_val);
+            QuickSort_Hybrid_DIESEL_ELECTRIC(arr_coppy,1,n, Threshold_val_operations);
 
         }
 
@@ -529,7 +480,7 @@ void Operation_comp_QS_vs_HQS(){
 
 void Operation_comp_QS_vs_HQS_runtime(){
 
-    for(int n=Step_Initial; n<= 5000; n+= Step_Size){
+        for(int n=Step_Initial; n<= Step_Final; n+= Step_Size){
 
         int *arr_init =(int*)malloc((n+1) * sizeof(int));
         int *arr_coppy =(int*)malloc((n+1) * sizeof(int));
@@ -543,48 +494,29 @@ void Operation_comp_QS_vs_HQS_runtime(){
 
             printf("Running QS : test %d , n %d \n", i, n);
 
-            Operation ass_QS_reg = prf.createOperation("dummy", n);
-            Operation cmp_QS_reg = prf.createOperation("dummy", n);
+                        Operation ass_QS_reg = prf.createOperation("Regular Ass QS", n);
+            Operation cmp_QS_reg = prf.createOperation("Regular Comp QS", n);
             QS_Ass = &ass_QS_reg;
             QS_Comp = &cmp_QS_reg;
 
+            prf.startTimer("RUNN_QS_REG", n);
+            for(int z = 0; z<T_running_tine; z++){
+                CopyArray(arr_coppy+1, arr_init+1, n);
+                QuickSort(arr_coppy,1,n);
+            }
+            prf.stopTimer("RUNN_QS_REG",n);
 
-            int **t_copies = (int**)malloc(T_running_tine * sizeof(int*));
-                for(int z = 0; z<T_running_tine; z++){
-                    t_copies[z] = (int*)malloc((n+1) * sizeof(int));
-                    t_copies[z][0] = -1;
-                    CopyArray(t_copies[z]+ 1, arr_init + 1, n);
-                }
-                
-                prf.startTimer("RUNN_QS_REG", n);
-                for(int z = 0; z<T_running_tine; z++){
-                    
-                    QuickSort(t_copies[z],1,n);
-                }
-                prf.stopTimer("RUNN_QS_REG",n);
-
-            // coppy now again into next pair to test
-            Operation ass_QS_hyb = prf.createOperation("dummy", n);
-            Operation cmp_QS_hyb = prf.createOperation("dummy", n);
+            Operation ass_QS_hyb = prf.createOperation("Hybrid Ass QS", n);
+            Operation cmp_QS_hyb = prf.createOperation("Hybrid Comp QS", n);
             QS_Th_Ass = &ass_QS_hyb;
             QS_Th_Comp = &cmp_QS_hyb;
-            
-            for(int z=0; z< T_running_tine; z++){
-                CopyArray(t_copies[z]+ 1, arr_init + 1, n);
+
+            prf.startTimer("RUNN_QS_HYB", n);
+            for(int z = 0; z<T_running_tine; z++){
+                CopyArray(arr_coppy+1, arr_init+1, n);
+                QuickSort_Hybrid_DIESEL_ELECTRIC(arr_coppy,1,n, Threshold_val_operations);
             }
-
-             prf.startTimer("RUNN_QS_HYB", n);
-                for(int z = 0; z<T_running_tine; z++){
-                    
-                    QuickSort_Hybrid_DIESEL_ELECTRIC(t_copies[z],1,n, Threshold_val);
-                }
             prf.stopTimer("RUNN_QS_HYB",n);
-
-                for(int z=0; z<T_running_tine; z++){
-                    free(t_copies[z]);
-                }            
-                free(t_copies);
-
         }
         free(arr_init);
         free(arr_coppy);
@@ -598,8 +530,47 @@ void Operation_comp_QS_vs_HQS_runtime(){
     
 
     prf.createGroup("QS_Running_TIMES", "RUNN_QS_HYB", "RUNN_QS_REG" );
-    prf.createGroup("QS_Comp_Hybird_vs_Reg", "QS_Compare_Compare", "dummy");
+    prf.createGroup("QS_Comp_Hybird_vs_Reg", "QS_Compare_Compare");
 
+}
+
+// QuickSelect (Randomized-Select)
+
+int Randomized_Partition(int *arr, int l, int r){
+
+    int x = l + rand() % (r - l + 1);   
+    swap_func(arr[x], arr[r]);          
+
+    int i = l-1;
+    for(int j = l; j < r; j++){
+        if(arr[j] < arr[r]){
+            i++;
+            swap_func(arr[i], arr[j]);
+        }
+    }
+    swap_func(arr[i+1], arr[r]);
+
+    return i+1;
+}
+
+int QuickSelect(int *arr, int l, int r, int k){
+
+    if(k < 1 || k > r - l + 1)               
+        return -1;
+
+    if(l == r)
+        return arr[l];
+
+    int pos = Randomized_Partition(arr, l, r);
+    int left_size = pos - l + 1;              
+
+    if(k == left_size)
+        return arr[pos];
+
+    if(k < left_size)
+        return QuickSelect(arr, l, pos-1, k);
+    else
+        return QuickSelect(arr, pos+1, r, k - left_size);
 }
 
 
@@ -632,12 +603,20 @@ void DEMO(){
     CopyArray(coppy_arr, arr, n);
 
     printf("Apply Quick Sort hybrid : ");
-    QuickSort_Hybrid_DIESEL_ELECTRIC(coppy_arr, 1, n-1, Threshold_val);
+    QuickSort_Hybrid_DIESEL_ELECTRIC(coppy_arr, 1, n-1, 10);
     print_array(coppy_arr,0,n);
 
-
+    int k_values[2] = {1, 5};
+    for(int t_ind = 0; t_ind < 2; t_ind++){
+        CopyArray(coppy_arr, arr, n);
+        int k = k_values[t_ind];
+        int k_pos = QuickSelect(coppy_arr, 1, n-1, k);
+        printf("QuickSelect k = %d : %d \n", k, k_pos );
+    }
     
 }
+
+
 
 
 int main(){
@@ -658,8 +637,8 @@ int main(){
         Operation_comp_QS_vs_HQS();
         Operation_comp_QS_vs_HQS_runtime();
         prf.showReport();
+
     }
-    
-    
+      
 
 }
